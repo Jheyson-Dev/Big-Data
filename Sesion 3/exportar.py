@@ -21,17 +21,15 @@ posts = soup.find_all('li', class_='infinite-post')
 
 if posts:
     with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['Title', 'Link', 'Image URL', 'Views', 'Description', 'Category', 'Date']
+        fieldnames = ['Title', 'Description', 'Date']
         # Cambiar el delimitador a "|"
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='|')
         writer.writeheader()
 
         for post in posts:
             title = post.find('h2').text.strip()
-            link = post.find('a')['href']
-            image = post.find('img')['src']
-            views = post.find('span', class_='feat-info-text').text.strip()
             description = post.find('p').text.strip()  # Extraer la descripción del artículo
+            link = post.find('a')['href']
 
             # Utilizar expresión regular para extraer la fecha del enlace
             date_pattern = r"/(\d{4})/(\d{2})/(\d{2})/"
@@ -44,16 +42,7 @@ if posts:
             else:
                 date_published = "No se pudo encontrar la fecha"
 
-            # Obtener el contenido completo del artículo
-            article_response = requests.get(link)
-            article_html = article_response.text
-            article_soup = BeautifulSoup(article_html, 'html.parser')
-
-            # Buscar y extraer la categoría del artículo
-            category = article_soup.find('a', class_='post-cat-link').text.strip()
-
-            writer.writerow({'Title': title, 'Link': link, 'Image URL': image, 'Views': views,
-                             'Description': description, 'Category': category, 'Date': date_published})
+            writer.writerow({'Title': title, 'Description': description, 'Date': date_published})
 
     print(f"Los datos han sido exportados correctamente a '{csv_file_path}'.")
 else:
